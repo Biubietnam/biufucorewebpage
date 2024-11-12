@@ -12,7 +12,7 @@ const uptimeData = [
   { time: '24:00', uptime: 99 },
 ];
 
-export default function GameServerAdmin() {
+export default function GameServerAdmin({user}) {
   const [command, setCommand] = useState('');
 
   const handleCommandSubmit = (e) => {
@@ -76,8 +76,8 @@ export default function GameServerAdmin() {
               <div className="card p-2 d-flex flex-row align-items-center w-100"style={{ maxWidth: '300px'}}>
                 <i className="fas fa-user-circle me-2"></i>
                 <div className="text-muted">
-                  <p className="mb-0">Username: <strong>JohnDoe</strong></p>
-                  <p className="mb-0">Role: <strong>Admin</strong></p>
+                  <p className="mb-0">Username: <strong>{user.username}</strong></p>
+                  <p className="mb-0">Role: <strong>{user.role ? user.role : "N/A"}</strong></p>
                 </div>
               </div>
             </div>

@@ -2,11 +2,13 @@ import logo from './logo.svg';
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AnimeModerationLogin from './page/login';
-import React from 'react';
-import GameServerAdmin from './page/dashboard'
+import React, { useEffect, useState } from 'react';
+import GameServerAdmin from './page/dashboard';
 
 function App() {
-  // Function to check token validity by sending a request to /request/tokencheck
+  const [user, setUser] = useState(null); // To store the decoded user data
+
+  // Function to check token validity and decode the token
   const initializeToken = async () => {
     let token = localStorage.getItem('token');
   
@@ -33,7 +35,11 @@ function App() {
       const result = await response.json();
   
       // Check the 'status' field in the result to determine validity
-      if (result.status !== "Valid") {
+      if (result.status === "Valid") {
+        // If valid, decode the token and set user data
+        const decodedUser = decodeToken(token);  // Decode the token to extract user info
+        setUser(decodedUser);  // Set user state
+      } else {
         console.log("Invalid token");
         localStorage.setItem('token', "0");
       }
@@ -43,16 +49,33 @@ function App() {
       localStorage.setItem('token', "0");
     }
   };
-  
+
+  // Decode the base64 token
+  const decodeToken = (token) => {
+    try {
+      const decoded = atob(token);  // Decode from base64
+      const parts = decoded.split(':'); // Split by colon (assuming format is 'username:someValue:otherValue:role')
+      
+      // Extract the username (index 0) and check if role exists at index 3
+      const username = parts[0];
+      const role = parts.length > 3 ? parts[3] : null;  // Check if index 3 exists for the role
+
+      // Return user object with username and role (if exists)
+      return { username, role: role || null };
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
 
   // Call the initializeToken function on component mount
-  React.useEffect(() => {
+  useEffect(() => {
     initializeToken();
   }, []);
 
   // Check token to determine if redirect to login is needed
   const token = localStorage.getItem('token');
-  if (token === "0" || token === null || token != '500') {
+  if (token === "0" || token === null || !user) {
     return (
       <Router>
         <Routes>
@@ -64,14 +87,14 @@ function App() {
     );
   }
 
-  // If token is valid, render the main app routes
+  // If token is valid and user is decoded, render the main app routes
   return (
     <Router>
       <div className="App">
         <Routes>
-          <Route path="/"/>
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<AnimeModerationLogin />} />
-          <Route path="/dashboard" element={<GameServerAdmin/>}/>
+          <Route path="/dashboard" element={<GameServerAdmin user={user} />} />
         </Routes>
       </div>
     </Router>
