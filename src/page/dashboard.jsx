@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 
 const uptimeData = [
   { time: '00:00', uptime: 100 },
@@ -64,15 +63,26 @@ export default function GameServerAdmin() {
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
           <div className="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
             <h1 className="h2">Game Server Control Panel</h1>
-            <div className="btn-toolbar mb-2 mb-md-0">
-              <div className="input-group">
+            <div className="d-flex align-items-center">
+              {/* Search Box */}
+              <div className="input-group me-3">
                 <input type="text" className="form-control" placeholder="Search..." aria-label="Search" />
                 <button className="btn btn-outline-secondary" type="button">
                   <i className="fas fa-search"></i>
                 </button>
               </div>
+
+              {/* Username and Role Box */}
+              <div className="card p-2 d-flex flex-row align-items-center w-100"style={{ maxWidth: '300px'}}>
+                <i className="fas fa-user-circle me-2"></i>
+                <div className="text-muted">
+                  <p className="mb-0">Username: <strong>JohnDoe</strong></p>
+                  <p className="mb-0">Role: <strong>Admin</strong></p>
+                </div>
+              </div>
             </div>
           </div>
+
 
           <div className="row mb-4">
             <div className="col-md-3 mb-4">

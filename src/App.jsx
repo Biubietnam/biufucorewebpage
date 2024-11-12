@@ -3,6 +3,7 @@ import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AnimeModerationLogin from './page/login';
 import React from 'react';
+import GameServerAdmin from './page/dashboard'
 
 function App() {
   // Function to check token validity by sending a request to /request/tokencheck
@@ -30,7 +31,6 @@ function App() {
       });
   
       const result = await response.json();
-      console.log(result);
   
       // Check the 'status' field in the result to determine validity
       if (result.status !== "Valid") {
@@ -52,7 +52,7 @@ function App() {
 
   // Check token to determine if redirect to login is needed
   const token = localStorage.getItem('token');
-  if (token === "0" || token === null) {
+  if (token === "0" || token === null || token != '500') {
     return (
       <Router>
         <Routes>
@@ -71,6 +71,7 @@ function App() {
         <Routes>
           <Route path="/"/>
           <Route path="/login" element={<AnimeModerationLogin />} />
+          <Route path="/dashboard" element={<GameServerAdmin/>}/>
         </Routes>
       </div>
     </Router>
