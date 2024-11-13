@@ -10,9 +10,8 @@ function App() {
     const storedUser = localStorage.getItem('user');
     return storedUser ? JSON.parse(storedUser) : null;
   });
-
-  const initializeToken = async () => {
     let token = localStorage.getItem('token');
+  const initializeToken = async () => {
     if (token === "0" || token === null) {
       localStorage.setItem('token', "0");
       return;
@@ -25,12 +24,14 @@ function App() {
         body: JSON.stringify({ token }),
       });
       const result = await response.json();
-
+      console.log("token check")
       if (result.status === "Valid") {
+        console.log("Valid")
         const decodedUser = decodeToken(token);
         setUser(decodedUser);
         localStorage.setItem('user', JSON.stringify(decodedUser));
       } else {
+        console.log("Token invalid")
         localStorage.setItem('token', "0");
         localStorage.removeItem('user');
       }
@@ -55,10 +56,10 @@ function App() {
   };
 
   useEffect(() => {
-    if (!user) initializeToken();
+    if (token) initializeToken();
   }, []);
 
-  if (!user) {
+  if (token==0 || token == null) {
     return (
       <Router>
         <Routes>
@@ -74,7 +75,7 @@ function App() {
       <div className="App">
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/login" element={<AnimeModerationLogin />} />
+          <Route path="/login" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<GameServerAdmin user={user} />} />
         </Routes>
       </div>

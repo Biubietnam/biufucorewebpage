@@ -1,32 +1,84 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Sidebar from './sidebard';
-const uptimeData = [
-  { time: '00:00', uptime: 100 },
-  { time: '04:00', uptime: 99 },
-  { time: '08:00', uptime: 100 },
-  { time: '12:00', uptime: 98 },
-  { time: '16:00', uptime: 100 },
-  { time: '20:00', uptime: 100 },
-  { time: '24:00', uptime: 99 },
-];
 
-export default function GameServerAdmin({user}) {
+export default function GameServerAdmin({ user }) {
   const [command, setCommand] = useState('');
-  const username = user.username
-  const role = user.role
+  const [startTime, setStartTime] = useState('');
+  const [playerData, setPlayerData] = useState(null);
+  const [cpudata, setcpudata] = useState(null);
+  const [uptimeData, setUptimeData] = useState([]); // State for uptime data
+  const username = user.username;
+  const role = user.role;
+
   const handleCommandSubmit = (e) => {
     e.preventDefault();
     console.log('Command submitted:', command);
     setCommand('');
   };
 
+  useEffect(() => {
+    const fetchData = () => {
+      // Fetch data from the init endpoint
+      fetch('/request/init')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.StartTime) {
+            setStartTime(data.StartTime); // Set StartTime to the state
+          }
+
+          if (data && data.cpuUsageHistory) {
+            // Process the cpuUsageHistory to extract the hour and uptime values
+            const newUptimeData = data.cpuUsageHistory.map(entry => {
+              const time = entry.time.split(' ')[1].substring(0, 2); // Extract the hour part
+              return {
+                time: time,
+                uptime: entry.cpupercent
+              };
+            });
+
+            setUptimeData(newUptimeData); // Replace the entire uptimeData with new data
+          }
+        })
+        .catch(error => console.error('Error fetching data:', error));
+
+      // Fetch player data
+      fetch('/request/getplayer')
+        .then(response => response.json())
+        .then(playerData => {
+          if (playerData) {
+            setPlayerData(playerData.playerCount); // Set player data
+          }
+        })
+        .catch(error => console.error('Error fetching player data:', error));
+
+      // Fetch CPU usage (or any other relevant data)
+      fetch('/request/getcpuusage')
+        .then(response => response.json())
+        .then(cpuusage => {
+          if (cpuusage) {
+            setcpudata(cpuusage.cpupercent); // Set CPU data
+          }
+        })
+        .catch(error => console.error('Error fetching CPU usage:', error));
+    };
+
+    // Initial fetch on component mount
+    fetchData();
+
+    // Set interval to fetch data every 10 seconds
+    const intervalId = setInterval(fetchData, 10000);
+
+    // Cleanup on component unmount
+    return () => clearInterval(intervalId);
+  }, []); // Empty dependency array means this effect runs once on mount and sets up the interval
+
   return (
     <div className="container-fluid">
       <div className="row">
         {/* Sidebar */}
-        <Sidebar/>
+        <Sidebar />
 
         {/* Main content */}
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
@@ -42,9 +94,9 @@ export default function GameServerAdmin({user}) {
               </div>
 
               {/* Username and Role Box */}
-              <div className="card p-2 d-flex flex-row align-items-center w-100"style={{ maxWidth: '300px'}}>
+              <div className="card p-2 d-flex flex-row align-items-center w-100 h-100" style={{ maxWidth: '300px', maxHeight: '100px' }}>
                 <i className="fas fa-user-circle me-2"></i>
-                <div className="text-muted">
+                <div className="text-muted" style={{ wordWrap: 'break-word', whiteSpace: 'normal' }}>
                   <p className="mb-0">Username: <strong>{username}</strong></p>
                   <p className="mb-0">Role: <strong>{role ? role : "N/A"}</strong></p>
                 </div>
@@ -52,13 +104,12 @@ export default function GameServerAdmin({user}) {
             </div>
           </div>
 
-
           <div className="row mb-4">
             <div className="col-md-3 mb-4">
               <div className="card bg-primary text-white h-100">
                 <div className="card-body">
                   <h5 className="card-title">Active Since</h5>
-                  <p className="card-text">10/24/2023, 11:23 AM</p>
+                  <p className="card-text">{startTime || 'Loading...'}</p>
                 </div>
               </div>
             </div>
@@ -66,7 +117,7 @@ export default function GameServerAdmin({user}) {
               <div className="card bg-success text-white h-100">
                 <div className="card-body">
                   <h5 className="card-title">Latest Update</h5>
-                  <p className="card-text">Server updated to v1.666</p>
+                  <p className="card-text">v.2.6.0</p>
                 </div>
               </div>
             </div>
@@ -74,7 +125,7 @@ export default function GameServerAdmin({user}) {
               <div className="card bg-warning text-white h-100">
                 <div className="card-body">
                   <h5 className="card-title">Active Players</h5>
-                  <p className="card-text">142</p>
+                  <p className="card-text">{playerData || '0'}</p>
                 </div>
               </div>
             </div>
@@ -82,7 +133,7 @@ export default function GameServerAdmin({user}) {
               <div className="card bg-info text-white h-100">
                 <div className="card-body">
                   <h5 className="card-title">Server Load</h5>
-                  <p className="card-text">37%</p>
+                  <p className="card-text">{cpudata + '%' || 'Loading...'}</p>
                 </div>
               </div>
             </div>

@@ -26,9 +26,9 @@ export default function AnimeModerationLogin() {
         // Store the token in localStorage
         localStorage.setItem('token', base64Token);
 
-        console.log(result)
         nav("/dashboard")
-        console.log('Login successful');
+        nav("/dashboard")
+        nav("/dashboard")
       } else {
         // Handle login failure (e.g., show error message)
         console.log('Login failed');
