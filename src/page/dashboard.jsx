@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-
+import Sidebar from './sidebard';
 const uptimeData = [
   { time: '00:00', uptime: 100 },
   { time: '04:00', uptime: 99 },
@@ -14,7 +14,8 @@ const uptimeData = [
 
 export default function GameServerAdmin({user}) {
   const [command, setCommand] = useState('');
-
+  const username = user.username
+  const role = user.role
   const handleCommandSubmit = (e) => {
     e.preventDefault();
     console.log('Command submitted:', command);
@@ -25,39 +26,7 @@ export default function GameServerAdmin({user}) {
     <div className="container-fluid">
       <div className="row">
         {/* Sidebar */}
-        <nav className="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-          <div className="position-sticky pt-3">
-            <h6 className="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
-              <span>Navigation</span>
-            </h6>
-            <ul className="nav flex-column">
-              <li className="nav-item">
-                <a className="nav-link active" href="#">
-                  <i className="fas fa-tachometer-alt me-2"></i>
-                  Dashboard
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  <i className="fas fa-server me-2"></i>
-                  Servers
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  <i className="fas fa-users me-2"></i>
-                  Users
-                </a>
-              </li>
-              <li className="nav-item">
-                <a className="nav-link" href="#">
-                  <i className="fas fa-cog me-2"></i>
-                  Settings
-                </a>
-              </li>
-            </ul>
-          </div>
-        </nav>
+        <Sidebar/>
 
         {/* Main content */}
         <main className="col-md-9 ms-sm-auto col-lg-10 px-md-4">
@@ -76,8 +45,8 @@ export default function GameServerAdmin({user}) {
               <div className="card p-2 d-flex flex-row align-items-center w-100"style={{ maxWidth: '300px'}}>
                 <i className="fas fa-user-circle me-2"></i>
                 <div className="text-muted">
-                  <p className="mb-0">Username: <strong>{user.username}</strong></p>
-                  <p className="mb-0">Role: <strong>{user.role ? user.role : "N/A"}</strong></p>
+                  <p className="mb-0">Username: <strong>{username}</strong></p>
+                  <p className="mb-0">Role: <strong>{role ? role : "N/A"}</strong></p>
                 </div>
               </div>
             </div>

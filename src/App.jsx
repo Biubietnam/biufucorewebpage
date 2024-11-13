@@ -6,61 +6,47 @@ import React, { useEffect, useState } from 'react';
 import GameServerAdmin from './page/dashboard';
 
 function App() {
-  const [user, setUser] = useState(null); // To store the decoded user data
+  const [user, setUser] = useState(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
 
-  // Function to check token validity and decode the token
   const initializeToken = async () => {
     let token = localStorage.getItem('token');
-  
-    // If token is "0" or null, don't make the request
     if (token === "0" || token === null) {
-      // Set the token to "0" for the first-time visitor
       localStorage.setItem('token', "0");
-      return; // Exit early to prevent the request
+      return;
     }
-  
+
     try {
-      // Log the token being sent
-      console.log('Sending token to server:', token);
-  
-      // Send request to check if the token is valid
       const response = await fetch('/request/tokencheck', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: token }),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token }),
       });
-  
       const result = await response.json();
-  
-      // Check the 'status' field in the result to determine validity
+
       if (result.status === "Valid") {
-        // If valid, decode the token and set user data
-        const decodedUser = decodeToken(token);  // Decode the token to extract user info
-        setUser(decodedUser);  // Set user state
+        const decodedUser = decodeToken(token);
+        setUser(decodedUser);
+        localStorage.setItem('user', JSON.stringify(decodedUser));
       } else {
-        console.log("Invalid token");
         localStorage.setItem('token', "0");
+        localStorage.removeItem('user');
       }
     } catch (error) {
-      // In case of error (e.g., network issues), set token to "0"
       console.error("Error while checking token:", error);
       localStorage.setItem('token', "0");
+      localStorage.removeItem('user');
     }
   };
 
-  // Decode the base64 token
   const decodeToken = (token) => {
     try {
-      const decoded = atob(token);  // Decode from base64
-      const parts = decoded.split(':'); // Split by colon (assuming format is 'username:someValue:otherValue:role')
-      
-      // Extract the username (index 0) and check if role exists at index 3
+      const decoded = atob(token);
+      const parts = decoded.split(':');
       const username = parts[0];
-      const role = parts.length > 3 ? parts[3] : null;  // Check if index 3 exists for the role
-
-      // Return user object with username and role (if exists)
+      const role = parts.length > 2 ? parts[2] : null;
       return { username, role: role || null };
     } catch (error) {
       console.error("Error decoding token:", error);
@@ -68,18 +54,14 @@ function App() {
     }
   };
 
-  // Call the initializeToken function on component mount
   useEffect(() => {
-    initializeToken();
+    if (!user) initializeToken();
   }, []);
 
-  // Check token to determine if redirect to login is needed
-  const token = localStorage.getItem('token');
-  if (token === "0" || token === null || !user) {
+  if (!user) {
     return (
       <Router>
         <Routes>
-          {/* Redirect to /login if token is "0" or null */}
           <Route path="*" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<AnimeModerationLogin />} />
         </Routes>
@@ -87,7 +69,6 @@ function App() {
     );
   }
 
-  // If token is valid and user is decoded, render the main app routes
   return (
     <Router>
       <div className="App">

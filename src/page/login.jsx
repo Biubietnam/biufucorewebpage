@@ -1,23 +1,24 @@
 import React, { useState } from 'react';
 import { Shield } from 'lucide-react';
-
+import { useNavigate } from 'react-router-dom';
 export default function AnimeModerationLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  
+  const [showPassword, setShowPassword] = useState(false);
+  const nav = useNavigate()
   const handleSubmit = async (event) => {
     event.preventDefault();
-    
+
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
-  
+
     try {
       const response = await fetch('/request/login', {
         method: 'POST',
         body: formData, // Use FormData instead of JSON
       });
-  
+
       if (response.ok) {
         const result = await response.json();
         const base64Token = result.token; // Assuming `token` contains the Base64 string from Java
@@ -26,6 +27,7 @@ export default function AnimeModerationLogin() {
         localStorage.setItem('token', base64Token);
 
         console.log(result)
+        nav("/dashboard")
         console.log('Login successful');
       } else {
         // Handle login failure (e.g., show error message)
@@ -59,7 +61,7 @@ export default function AnimeModerationLogin() {
               <div className="mb-3">
                 <label htmlFor="password" className="form-label">Password</label>
                 <input
-                  type="password"
+                  type={showPassword ? "text" : "password"} // Toggle between text and password
                   className="form-control"
                   id="password"
                   placeholder="Enter your password"
@@ -67,6 +69,18 @@ export default function AnimeModerationLogin() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
+              </div>
+              <div className="mb-3 form-check">
+                <input
+                  type="checkbox"
+                  className="form-check-input"
+                  id="showPassword"
+                  checked={showPassword}
+                  onChange={() => setShowPassword(!showPassword)} // Toggle showPassword state
+                />
+                <label className="form-check-label" htmlFor="showPassword">
+                  Show password
+                </label>
               </div>
               <div className="mb-3 form-check">
                 <input type="checkbox" className="form-check-input" id="rememberMe" />
