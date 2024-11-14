@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import Sidebar from './sidebard';
+import Sidebar from './sidebar';
 
 export default function GameServerAdmin({ user }) {
   const [command, setCommand] = useState('');

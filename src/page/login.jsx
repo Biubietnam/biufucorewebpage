@@ -1,43 +1,66 @@
 import React, { useState } from 'react';
 import { Shield } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import ErrorModal from './ErrorModal'; // Import the ErrorModal component
+
 export default function AnimeModerationLogin() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const nav = useNavigate()
+  const [showErrorModal, setShowErrorModal] = useState(false); // State for modal visibility
+  const [errorMessage, setErrorMessage] = useState(''); // Store the error message
+
   const handleSubmit = async (event) => {
     event.preventDefault();
-
+  
     const formData = new FormData();
     formData.append('username', username);
     formData.append('password', password);
-
+  
     try {
       const response = await fetch('/request/login', {
         method: 'POST',
-        body: formData, // Use FormData instead of JSON
+        body: formData,
       });
-
+  
       if (response.ok) {
         const result = await response.json();
-        const base64Token = result.token; // Assuming `token` contains the Base64 string from Java
-
+        const base64Token = result.token;
+  
         // Store the token in localStorage
         localStorage.setItem('token', base64Token);
-
-        nav("/dashboard")
-        nav("/dashboard")
-        nav("/dashboard")
+  
+        // Decode and store user data as JSON in localStorage
+        const decodedUser = decodeToken(base64Token);
+        localStorage.setItem('user', JSON.stringify(decodedUser));
+  
+        // Redirect to dashboard with a full page reload
+        window.location.href = "/dashboard"; // This causes a full page reload
       } else {
-        // Handle login failure (e.g., show error message)
-        console.log('Login failed');
+        // If login failed, set the error message and show the error modal
+        setErrorMessage('Invalid username or password. Please try again.');
+        setShowErrorModal(true);
       }
     } catch (error) {
       console.error('Error logging in:', error);
+      setErrorMessage('An error occurred while logging in. Please try again later.');
+      setShowErrorModal(true); // Show the modal on error
     }
   };
-
+  
+  // Function to decode token
+  const decodeToken = (token) => {
+    try {
+      const decoded = atob(token);
+      const parts = decoded.split(':');
+      const username = parts[0];
+      const role = parts.length > 2 ? parts[2] : null;
+      return { username, role: role || null };
+    } catch (error) {
+      console.error("Error decoding token:", error);
+      return null;
+    }
+  };
+  
   return (
     <div className="container-fluid min-vh-100 d-flex bg-light">
       <div className="row w-100 m-0">
@@ -106,6 +129,9 @@ export default function AnimeModerationLogin() {
           </p>
         </div>
       </div>
+      
+      {/* Error Modal */}
+      {showErrorModal && <ErrorModal message={errorMessage} onClose={() => setShowErrorModal(false)} />}
     </div>
   );
 }

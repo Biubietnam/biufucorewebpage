@@ -1,9 +1,10 @@
-import logo from './logo.svg';
+
 import './App.css';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import AnimeModerationLogin from './page/login';
 import React, { useEffect, useState } from 'react';
 import GameServerAdmin from './page/dashboard';
+import SettingsPage from './page/settings';
 
 function App() {
   const [user, setUser] = useState(() => {
@@ -38,7 +39,7 @@ function App() {
     } catch (error) {
       console.error("Error while checking token:", error);
       localStorage.setItem('token', "0");
-      localStorage.removeItem('user');
+      localStorage.setItem('user', null);
     }
   };
 
@@ -77,6 +78,7 @@ function App() {
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/login" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<GameServerAdmin user={user} />} />
+          <Route path='/settings' element={<SettingsPage/>}/>
         </Routes>
       </div>
     </Router>
